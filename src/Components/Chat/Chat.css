@@ -7,7 +7,10 @@
 }
 
 .chat__messages {
+  display: flex;
+  flex-direction: column-reverse;
   flex: 1;
+  overflow: scroll;
 }
 
 .chat__input {

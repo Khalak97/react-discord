@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 
 import "./Sidebar.css";
 
@@ -14,11 +15,38 @@ import MicIcon from "@material-ui/icons/Mic";
 import HeadsetIcon from "@material-ui/icons/Headset";
 import SettingsIcon from "@material-ui/icons/Settings";
 
+import { selectUser } from "../../features/userSlice";
+import db, { auth } from "../../firebase";
+
 function Sidebar() {
+  const user = useSelector(selectUser);
+  const [channels, setChannels] = useState([]);
+
+  useEffect(() => {
+    db.collection("channels").onSnapshot((snapshot) =>
+      setChannels(
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          channel: doc.data(),
+        }))
+      )
+    );
+  }, []);
+
+  const handleAddChannel = () => {
+    const channelName = prompt("Enter channel name");
+
+    if (channelName) {
+      db.collection("channels").add({
+        channelName: channelName,
+      });
+    }
+  };
+
   return (
     <div className="sidebar">
       <div className="sidebar__top">
-        <h3>user name</h3>
+        <h3>{user.displayName}</h3>
         <ExpandMoreIcon />
       </div>
 
@@ -28,13 +56,17 @@ function Sidebar() {
             <ExpandMoreIcon />
             <h4>Your channels</h4>
           </div>
-          <AddIcon className="sidebar__addChannel" />
+          <AddIcon onClick={handleAddChannel} className="sidebar__addChannel" />
         </div>
 
         <div className="sidebar__channelsList">
-          <SidebarChannel channel="Youtube" />
-          <SidebarChannel channel="Youtube" />
-          <SidebarChannel channel="Youtube" />
+          {channels.map(({ id, channel }) => (
+            <SidebarChannel
+              key={id}
+              id={id}
+              channelName={channel.channelName}
+            />
+          ))}
         </div>
       </div>
 
@@ -54,10 +86,10 @@ function Sidebar() {
       </div>
 
       <div className="sidebar__profile">
-        <Avatar />
+        <Avatar onClick={() => auth.signOut()} src={user.photo} />
         <div className="sidebar__profileInfo">
-          <h3>user name</h3>
-          <p>#thisIsMyId</p>
+          <h3>{user.displayName}</h3>
+          <p>$uid</p>
         </div>
         <div className="sidebar__profileIcons">
           <MicIcon />
