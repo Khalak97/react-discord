@@ -11,6 +11,12 @@
   flex-direction: column-reverse;
   flex: 1;
   overflow: scroll;
+  scrollbar-width: none; /*firefox*/
+}
+
+/*chrome*/
+.chat__messages::-webkit-scrollbar {
+  display: none;
 }
 
 .chat__input {
